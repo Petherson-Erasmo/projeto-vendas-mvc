@@ -1,74 +1,71 @@
 package com.projetovenda.vendas.controller;
 
+import com.projetovenda.vendas.exception.ClienteNotFoundException;
+import com.projetovenda.vendas.service.ClienteService;
 import com.projetovenda.vendas.dto.ClienteDTO;
 import com.projetovenda.vendas.model.Cliente;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.projetovenda.vendas.repository.ClienteRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
 
     @Autowired
-    private ClienteRepository clienteRepository;
+    private ClienteService clienteService;
 
     @GetMapping
-    public List<ClienteDTO> getAllClientes() {
-        List<Cliente> clientes = clienteRepository.findAll();
-        return ClienteDTO.converterToDTOList(clientes);
+    public ResponseEntity<List<ClienteDTO>> getAllClientes() {
+        List<Cliente> clientes = clienteService.findAll();
+        return ResponseEntity.status(HttpStatus.OK).body(ClienteDTO.converterToDTOList(clientes));
     }
 
      @GetMapping("/{id}")
-     public ClienteDTO getClienteById(@PathVariable Long id) {
-         final Optional<Cliente> optCliente = clienteRepository.findById(id);
-
-         if (optCliente.isPresent()) {
-             Cliente cliente = optCliente.get();
-
-             return new ClienteDTO(cliente);
-         } else {
-             System.out.println("Cliente não encontrado");
-             return null;
+     public ResponseEntity getClienteById(@PathVariable Long id) {
+         try {
+             Cliente cliente = clienteService.findById(id);
+             return ResponseEntity.status(HttpStatus.OK).body(new ClienteDTO(cliente));
+         } catch (ClienteNotFoundException e) {
+             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+         } catch (RuntimeException e) {
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro Interno");
          }
      }
 
     @PostMapping
-    public ClienteDTO saveCliente(@RequestBody ClienteDTO clienteDTO) {
+    public ResponseEntity<ClienteDTO> saveCliente(@RequestBody ClienteDTO clienteDTO) {
         Cliente cliente = clienteDTO.createCliente();
-
-        clienteRepository.save(cliente);
-        return new ClienteDTO(cliente);
+        Cliente newCliente = clienteService.saveCliente(cliente);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ClienteDTO(newCliente));
     }
 
     @PutMapping("/{id}")
-     public ClienteDTO updateCliente(@PathVariable Long id, @RequestBody ClienteDTO clienteDTO) {
-
-        final Optional<Cliente> optCliente = clienteRepository.findById(id);
-
-        if (optCliente.isPresent()) {
-            Cliente cliente = optCliente.get();
+     public ResponseEntity updateCliente(@PathVariable Long id, @RequestBody ClienteDTO clienteDTO) {
+        try {
+            Cliente cliente = clienteService.findById(id);
             clienteDTO.updateCliente(cliente);
-            clienteRepository.save(cliente);
-            return new ClienteDTO(cliente);
-        } else {
-            System.out.println("Cliente não encontrado");
-            return null;
+            Cliente updateCliente = clienteService.saveCliente(cliente);
+            return ResponseEntity.status(HttpStatus.OK).body(new ClienteDTO(updateCliente));
+        } catch (ClienteNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro Interno");
         }
      }
 
     @DeleteMapping("/{id}")
-    public void deleteCliente(@PathVariable Long id) {
-
-        final Optional<Cliente> optCliente = clienteRepository.findById(id);
-
-        if (optCliente.isPresent()) {
-            clienteRepository.deleteById(id);
-        }else {
-            System.out.println("Cliente não encontrado");
+    public ResponseEntity deleteCliente(@PathVariable Long id) {
+        try {
+            clienteService.deleteById(id);
+            return ResponseEntity.status(HttpStatus.OK).body("Cliente Apagado");
+        } catch (ClienteNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro Interno");
         }
     }
 
