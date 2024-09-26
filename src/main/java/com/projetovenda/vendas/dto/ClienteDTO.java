@@ -1,5 +1,6 @@
 package com.projetovenda.vendas.dto;
 
+import com.projetovenda.vendas.exception.ValidateFormFillingException;
 import com.projetovenda.vendas.model.Cliente;
 
 import java.time.LocalDate;
@@ -51,6 +52,7 @@ public class ClienteDTO {
     public Cliente createCliente() {
         Cliente cliente = new Cliente();
 
+        validateCliente();
         cliente.setCpf(cpf);
         cliente.setNome(nome);
         cliente.setDataNascimento(dataNascimento);
@@ -63,5 +65,13 @@ public class ClienteDTO {
         cliente.setDataNascimento(dataNascimento);
     }
 
-
+    private void validateCliente() {
+        if (nome == null || nome.isBlank()){
+            throw new ValidateFormFillingException("Nome Obrigatório");
+        }else if (cpf == null || cpf.isBlank()) {
+            throw new ValidateFormFillingException("CPF Obrigatório");
+        } else if (dataNascimento == null) {
+            throw new ValidateFormFillingException("Data de Nascimento Obrigatório");
+        }
+    }
 }

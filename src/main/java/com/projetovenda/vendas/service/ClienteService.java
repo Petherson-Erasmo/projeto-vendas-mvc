@@ -1,5 +1,6 @@
 package com.projetovenda.vendas.service;
 
+import com.projetovenda.vendas.exception.ClienteException;
 import com.projetovenda.vendas.exception.ClienteNotFoundException;
 import com.projetovenda.vendas.model.Cliente;
 import com.projetovenda.vendas.repository.ClienteRepository;
@@ -15,7 +16,7 @@ public class ClienteService {
     private ClienteRepository clienteRepository;
 
     public Cliente saveCliente(Cliente cliente){
-
+        validateName(cliente.getNome());
         return clienteRepository.save(cliente);
     }
 
@@ -37,8 +38,13 @@ public class ClienteService {
         if (cliente != null) {
             clienteRepository.deleteById(id);
         }
-
     }
 
-
+    private void validateName(String clienteName){
+        if(clienteName.length() < 20) {
+            throw new ClienteException("O nome não pode ter menos do que 20 caracteres");
+        } else if (clienteName.length() > 255) {
+            throw new ClienteException("O nome não pode ter mais do que 255 caracteres");
+        }
+    }
 }

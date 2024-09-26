@@ -1,6 +1,8 @@
 package com.projetovenda.vendas.controller;
 
+import com.projetovenda.vendas.exception.ClienteException;
 import com.projetovenda.vendas.exception.ClienteNotFoundException;
+import com.projetovenda.vendas.exception.ValidateFormFillingException;
 import com.projetovenda.vendas.service.ClienteService;
 import com.projetovenda.vendas.dto.ClienteDTO;
 import com.projetovenda.vendas.model.Cliente;
@@ -37,10 +39,17 @@ public class ClienteController {
      }
 
     @PostMapping
-    public ResponseEntity<ClienteDTO> saveCliente(@RequestBody ClienteDTO clienteDTO) {
-        Cliente cliente = clienteDTO.createCliente();
-        Cliente newCliente = clienteService.saveCliente(cliente);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ClienteDTO(newCliente));
+    public ResponseEntity saveCliente(@RequestBody ClienteDTO clienteDTO) {
+        try {
+            Cliente cliente = clienteDTO.createCliente();
+            Cliente newCliente = clienteService.saveCliente(cliente);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ClienteDTO(newCliente));
+        } catch (ValidateFormFillingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (ClienteException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
+        }
+
     }
 
     @PutMapping("/{id}")
