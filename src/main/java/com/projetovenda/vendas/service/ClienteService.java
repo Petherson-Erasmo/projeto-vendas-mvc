@@ -7,6 +7,7 @@ import com.projetovenda.vendas.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ public class ClienteService {
 
     public Cliente saveCliente(Cliente cliente){
         validateName(cliente.getNome());
+        validateDateOfBirth(cliente.getDataNascimento());
         return clienteRepository.save(cliente);
     }
 
@@ -41,10 +43,21 @@ public class ClienteService {
     }
 
     private void validateName(String clienteName){
-        if(clienteName.length() < 20) {
+        if(clienteName.length() < 10) {
             throw new ClienteException("O nome não pode ter menos do que 20 caracteres");
         } else if (clienteName.length() > 255) {
             throw new ClienteException("O nome não pode ter mais do que 255 caracteres");
         }
     }
+
+    private void validateDateOfBirth(LocalDate dataNascimento){
+        if(dataNascimento == null) {
+            throw new ClienteException("Data de nascimento é obrigatória");
+        } else if (dataNascimento.isAfter(LocalDate.now())) {
+            throw new ClienteException("Data de nascimento não pode ser no futuro");
+        } else if (dataNascimento.isBefore(LocalDate.of(1900, 1, 1))) {
+            throw new ClienteException("Data de nascimento não pode ser antes de 1900");
+        }
+    }
+
 }
