@@ -60,6 +60,8 @@ public class ClienteDTO {
     }
 
     public void updateCliente(Cliente cliente) {
+        validateCliente();
+
         cliente.setCpf(cpf);
         cliente.setNome(nome);
         cliente.setDataNascimento(dataNascimento);
@@ -70,6 +72,8 @@ public class ClienteDTO {
             throw new ValidateFormFillingException("Nome Obrigatório");
         }else if (cpf == null || cpf.isBlank()) {
             throw new ValidateFormFillingException("CPF Obrigatório");
+        } else if (cpf.length() != 11) {
+            throw new ValidateFormFillingException("CPF deve ter 11 caracteres");
         } else if (dataNascimento == null) {
             throw new ValidateFormFillingException("Data de Nascimento Obrigatório");
         }

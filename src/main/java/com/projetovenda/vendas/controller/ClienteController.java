@@ -61,10 +61,14 @@ public class ClienteController {
             return ResponseEntity.status(HttpStatus.OK).body(new ClienteDTO(updateCliente));
         } catch (ClienteNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (ValidateFormFillingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (ClienteException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro Interno");
         }
-     }
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity deleteCliente(@PathVariable Long id) {
