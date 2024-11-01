@@ -1,60 +1,57 @@
 package com.projetovenda.vendas.controller;
 
 import com.projetovenda.vendas.dto.UnidadeMedidaDTO;
+import com.projetovenda.vendas.exception.ClienteException;
+import com.projetovenda.vendas.exception.UnidadeMedidaNotFoundException;
 import com.projetovenda.vendas.model.UnidadeMedida;
-import com.projetovenda.vendas.repository.UnidadeMedidaRepository;
-import org.apache.logging.log4j.util.Unbox;
+import com.projetovenda.vendas.service.UnidadeMedidaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/unidades-medida")
 public class UnidadeMedidaController {
 
     @Autowired
-    private UnidadeMedidaRepository unidadeMedidaRepository;
+    public UnidadeMedidaService unidadeMedidaService;
 
     @GetMapping
-    public List<UnidadeMedidaDTO> getAllUnidadeMedida() {
-        List<UnidadeMedida> unidadesMedida = unidadeMedidaRepository.findAll();
-        return UnidadeMedidaDTO.converterToDTOList(unidadesMedida);
+    public ResponseEntity<List<UnidadeMedidaDTO>> getAllUnidadeMedida() {
+        List<UnidadeMedida> unidadesMedida = unidadeMedidaService.findAllUnidadeMedida();
+        return ResponseEntity.status(HttpStatus.OK).body(UnidadeMedidaDTO.converterToDTOList(unidadesMedida));
     }
 
     @PostMapping
-    public UnidadeMedidaDTO createUnidadeMedida(@RequestBody UnidadeMedidaDTO unidadeMedidaDTO) {
+    public ResponseEntity<UnidadeMedidaDTO> createUnidadeMedida(@RequestBody UnidadeMedidaDTO unidadeMedidaDTO) {
         UnidadeMedida unidadeMedida = unidadeMedidaDTO.createUnidadeMedida();
 
-        unidadeMedidaRepository.save(unidadeMedida);
-        return new UnidadeMedidaDTO(unidadeMedida);
+        UnidadeMedida newUnidadeMedida = unidadeMedidaService.saveUnidadeMedida(unidadeMedida);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UnidadeMedidaDTO(newUnidadeMedida));
     }
 
     @PutMapping("/{id}")
-    public UnidadeMedidaDTO updateUnidadeMedida(@PathVariable Long id, @RequestBody UnidadeMedidaDTO unidadeMedidaDTO) {
-        final Optional<UnidadeMedida> optUnidadeMedida = unidadeMedidaRepository.findById(id);
-
-        if (optUnidadeMedida.isPresent()) {
-            UnidadeMedida unidadeMedida = optUnidadeMedida.get();
+    public ResponseEntity updateUnidadeMedida(@PathVariable Long id, @RequestBody UnidadeMedidaDTO unidadeMedidaDTO) {
+        try {
+            UnidadeMedida unidadeMedida = unidadeMedidaService.findUnidadeMedidaById(id);
             unidadeMedidaDTO.updateUnidadeMedida(unidadeMedida);
-            unidadeMedidaRepository.save(unidadeMedida);
-            return new UnidadeMedidaDTO(unidadeMedida);
-        } else {
-            System.out.println("Unidade de medida não encontrada");
-            return null;
+            UnidadeMedida updatedUnidadeMedida = unidadeMedidaService.saveUnidadeMedida(unidadeMedida);
+            return ResponseEntity.status(HttpStatus.OK).body(new UnidadeMedidaDTO(updatedUnidadeMedida));
+        } catch (ClienteException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUnidadeMedida(@PathVariable Long id) {
-        final Optional<UnidadeMedida> optUnidadeMedida = unidadeMedidaRepository.findById(id);
-
-        if (optUnidadeMedida.isPresent()) {
-            UnidadeMedida unidadeMedida = optUnidadeMedida.get();
-            unidadeMedidaRepository.delete(unidadeMedida);
-        } else {
-            System.out.println("Unidade de medida não encontrada");
+    public ResponseEntity deleteUnidadeMedida(@PathVariable Long id) {
+        try {
+            unidadeMedidaService.deleteUnidadeMedida(id);
+            return ResponseEntity.status(HttpStatus.OK).body("Unidade de medida deletada com sucesso");
+        } catch (UnidadeMedidaNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }
