@@ -14,7 +14,7 @@ public class ProdutoDTO {
     private UnidadeMedida unidadeMedida;
 
     // Constructor
-    public ProdutoDTO(String nome, float valor, int quantidade, UnidadeMedida unidadeMedida) {
+    public ProdutoDTO(int id, String nome, float valor, int quantidade, UnidadeMedida unidadeMedida) {
         this.id = id;
         this.nome = nome;
         this.valor = valor;

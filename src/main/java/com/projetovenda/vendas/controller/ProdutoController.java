@@ -68,5 +68,11 @@ public class ProdutoController {
             System.out.println("Produto não encontrado");
         }
     }
-    
+
+    @GetMapping("/all")
+    public List<Produto> getAllProdutosasll() {
+        List<Produto> produtos = produtoRepository.findAll();
+        return produtos;
+    }
+
 }

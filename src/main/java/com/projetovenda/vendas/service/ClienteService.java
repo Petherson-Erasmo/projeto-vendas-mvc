@@ -19,6 +19,7 @@ public class ClienteService {
     public Cliente saveCliente(Cliente cliente){
         validateName(cliente.getNome());
         validateDateOfBirth(cliente.getDataNascimento());
+/*        validateCPFExists(cliente.getCpf());*/
         return clienteRepository.save(cliente);
     }
 
@@ -60,4 +61,18 @@ public class ClienteService {
         }
     }
 
+    /*private void validateCPFExists(String cpf){
+        if (cpf != null) {
+            throw new ClienteException("CPF já cadastrado");
+        }
+    }
+
+    private Boolean validateScriptInjection(String email){
+        String EMAIL_REGEX = "/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/";
+
+        Pattern pattern = Pattern.compile(EMAIL_REGEX);
+        Matcher matcher = pattern.matcher(email);
+
+        return matcher.matches();
+    }*/
 }

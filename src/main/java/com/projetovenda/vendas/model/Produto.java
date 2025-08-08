@@ -19,7 +19,7 @@ public class Produto {
     @Column(nullable = false)
     private float valor;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER,cascade=CascadeType.ALL)
     @JoinColumn(name = "idunidade_medida", nullable = false)
     private UnidadeMedida unidadeMedida;
 
